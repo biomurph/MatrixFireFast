@@ -1,3 +1,53 @@
+# biomurph fork
+## RP2040
+* Added MatrixFireFast_RP2040 Sketch for Verification
+	* Target: RP2040 Pico H
+	* Matrix: Waveshare 16x10 [matrix](https://www.waveshare.com/pico-rgb-led.htm)
+
+![RP2040 Fire](assets/MatrixFireFast_RP2040.mp4)
+
+## HUB75 Matrix Panel
+* Added MatrixFireFast_FK-8F1 Sketch
+	* Target: ESP32-S2 on [FK-8F1](https://www.amazon.ca/FK-8F1-Color-Controller-Asynchronous-Pixels/dp/B0D5V8STB7) HUB75 panel controler (link for reference only, board found in LED sign).
+	* Matrix: This [LED sign](https://www.amazon.com/LED-Resolution-P10-Technology-Advertising/dp/B07Q3NB1D5) (link for reference only, might not be the same)
+* Dependencies:
+	* Works with the Adafruit_Protomatter library. Could also work with other HUB75 libraries??
+
+### FK-8F1
+This is a generic HUB75 LED matrix panel control board. It has
+
+* ESP32-S2
+* 8MB Flash
+* RTC [BM8563](https://pdf1.alldatasheet.com/datasheet-pdf/view/1768247/BELLING/BM8563.html) or [PCF8563](https://www.nxp.com/docs/en/data-sheet/PCF8563.pdf)?
+
+![FK-8F1 pins](assets/FK-8F1.jpeg)
+
+* The I2S header row looks like a peripheral add on? 
+* The header with GPIO2 and resistor ladder is probably for a selector switch?
+* 75E is the header for HUB75 
+	* The GND pin between G2 and B is wired to ESP32 as E pin. Needs to be pulled to GND, I think... maybe not? but Imma do it.
+* Had to dig out the Reset pin. Soldering a bit of wire to the leg of U1 is not so bad. Couldn't find it broken out at all.
+
+I am using TXD, RXD, GPIO, and RESET wired up to program. I have FTDI breakout connected to RXD, TXD and GND. Two pushbuttons wired to GPIO0 and RESET put the ESP into bootloader mode. After the upload from Arduino, I have to press RESET to get the new sketch to run. Not bad at all!
+
+Next steps are to make the ESP32 into a web server so that I can adjust the fire variables remotely in runtime.
+
+* flareRows: Number of rows from the bottom a flare can happen
+* flareMax: Maximum number of flares allowed to exist at one time
+* flareChance: Odds that a flare would even happen
+* flareDecay: Rate that a flare will die out
+* colorDepth: Adding more fire fade colors makes the fire take up more rows from the bottom
+
+This is the first successful fire animation with the stock color depth. Notice how it is a low fire. [also, might be running at a slower frame rate, depending on your systemz]
+
+![lowFire](assets/lowFire.mp4)
+
+Here, I made a bigger array for the color fade to take up more of the display. I will need to tweak the knobs to dial in a more realistic burn.
+
+![biggerFire](assets/biggerFire.mp4)
+
+## TOGGLEDBITS README BELOW
+
 # MatrixFireFast
 
 Just on a whim, I decided to make my own fire simulation using a 44x11 WS2812 matrix I had purchased on Amazon. There's plenty of code available to do this, but I just wanted to figure out for myself how to code a nice-looking animation. So I ignored all of those other implementations, and just set about failing repeatedly... until I didn't.
@@ -176,3 +226,4 @@ Donations in support of my projects are always greatly appreciated, regardless o
 MatrixFastFire is licensed under the Gnu Public License version 3. Please see the LICENSE file.
 
 Copyright 2020 Patrick H. Rigney, All Rights Reserved.
+``
