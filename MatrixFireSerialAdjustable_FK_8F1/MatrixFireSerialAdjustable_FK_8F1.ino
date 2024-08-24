@@ -5,14 +5,11 @@
  * Author: Patrick Rigney (https://www.toggledbits.com/)
  * Copyright 2020 Patrick H. Rigney, All Rights Reserved.
  *
- * Github: https://github.com/toggledbits/MatrixFireFast
- * License information can be found at the above Github link.
- *
     Modified by Joel Murphy (https://www.biomurph.com) Summer, 2024
 
     Target: ESP32-S2 mounted on FK-8F1 board Reference Link: (https://www.amazon.ca/FK-8F1-Color-Controller-Asynchronous-Pixels/dp/B0D5V8STB7)
  
-    The FK-8F1 was found inside this 32H x 160W LED display: (link)
+    The FK-8F1 was found inside this 32H x 160W LED display: (https://www.amazon.com/LED-Resolution-P10-Technology-Advertising/dp/B07Q3NB1D5)
 
     The MakeFireFast code expects to see a string of neo pixels. 
     Thankfully, the MakeFireFast code uses a 2D array [row][col] to store the heat color data.
@@ -22,22 +19,20 @@
         // This is based on the HSV function in Adafruit_NeoPixel.cpp, but with
         // 16-bit RGB565 output for GFX lib rather than 24-bit. See that code for
         // an explanation of the math, this is stripped of comments for brevity.
-        uint16_t Adafruit_Protomatter::color565(int c) {
+        uint16_t Adafruit_Protomatter::color24bit(int c) {
           uint8_t r = (c >> 16) & 0xFF;
           uint8_t g = (c >> 8) & 0xFF;
           uint8_t b = c & 0xFF;
           return colorRGB(r,g,b);
         }
-    
-    And I changed changed the existing color565 to colorRGB, which makes more sense:
-          uint16_t colorRGB(uint8_t red, uint8_t green, uint8_t blue) {
-            return ((red & 0xF8) << 8) | ((green & 0xFC) << 3) | (blue >> 3);
-          }
 
-    Success!
-    I am using the pix[][] paradigm to address an array of color values.
-    pix array is [y][x] or [row][col] with the origin preferably at Lower Left of matrix [San Diego]
-    If you see something funny, check the setRotation setting in setup.
+    This version uses the serial connection to adjust fire variables
+      - flareRows
+      - nFlare
+      - flareChance
+      - flareDecay
+
+      - colorDepth (?)
  
  */
 
@@ -55,9 +50,9 @@
   uint8_t oePin      = 11;
 
 
-#define VERSION "ESP32"
+#define VERSION "ESP32 Serial Adjustable"
 
-// #define DISPLAY_TEST  /* define to show test patterns at startup */
+// #define DISPLAY_TEST  /* uncomment to show test patterns at startup */
 
 Adafruit_Protomatter matrix(
   160,          // Width of matrix (or matrix chain) in pixels
@@ -71,36 +66,44 @@ Adafruit_Protomatter matrix(
 
 /* Display size; can be smaller than matrix size, and if so, you can move the origin.
  * This allows you to have a small fire display on a large matrix sharing the display
- * with other stuff. See README at Github. */
-// const uint16_t rows = MAT_H * PANELS_H;
-// const uint16_t cols = MAT_W * PANELS_W;
-// const uint16_t xorg = 0;
-// const uint16_t yorg = 0;
+ * with other stuff. 
+ */
 const uint16_t rows = MATRIX_HEIGHT;
 const uint16_t cols = MATRIX_WIDTH;
 
-/* Flare constants */
-const uint8_t flarerows = 3;    /* number of rows (from bottom) allowed to flare */
-const uint8_t maxflare = 3;     /* max number of simultaneous flares */
-const uint8_t flarechance = 40; /* chance (%) of a new flare (if there's room) */
-const uint8_t flaredecay = 16;  /* decay rate of flare radiation; 14 is good */
+const uint8_t MAX_FLARE_ROWS = MATRIX_HEIGHT;     /* set max array size for flare rows */
+
+/* Flare-iables */
+uint8_t flareRows = 3;    /* variable number of rows (from bottom) allowed to flare,  was const */
+uint8_t MaxFlareRows = 10;
+uint8_t MinFlareRows = 1;
+uint8_t flareMax = 5;     /* variable max number of simultaneous flares */
+uint8_t MaxFlares = 30;
+uint8_t MinFlares = 2;
+uint8_t flareChance = 40; /* variable chance (%) of a new flare (if maxflare allows room) */
+uint8_t MaxFlareChance = 100;
+uint8_t MinFlareChance = 10;
+uint8_t flareDecay = 16;  /* variable decay rate of flare radiation; 14 is good?? */
+uint8_t MaxFlareDecay = 30;
+uint8_t MinFlareDecay = 3;
 
 
-// const uint32_t flameColor[] = {
-//   0x000000,
-//   0x100000,
-//   0x300000,
-//   0x600000,
-//   0x800000,
-//   0xA00000,
-//   0xC20000,
-//   0xC04000,
-//   0xC06000,
-//   0xC08000,
-//   0x807080
-// };
+const uint32_t flameColor_11[] = {
+  0x000000,
+  0x100000,
+  0x300000,
+  0x600000,
+  0x800000,
+  0xA00000,
+  0xC20000,
+  0xC04000,
+  0xC06000,
+  0xC08000,
+  0x807080
+};
+const uint8_t NCOLORS_11 = (sizeof(flameColor_11)/sizeof(flameColor_11[0]));
 
-const uint32_t flameColor[] = {
+const uint32_t flameColor_18[] = {
   0x000000,
   0xFF0000,
   0xCF0100,
@@ -120,14 +123,12 @@ const uint32_t flameColor[] = {
   0xFCA01F,
   0xF6BD39
 };
+const uint8_t NCOLORS_18 = (sizeof(flameColor_18)/sizeof(flameColor_18[0]));
 
-const uint8_t NCOLORS = (sizeof(flameColor)/sizeof(flameColor[0]));
 
-
-uint32_t pix[rows][cols];  // x, y uint8_t pix[rows][cols];
-// CRGB matrix[MAT_H * PANELS_H * MAT_W * PANELS_W];
+uint32_t pix[rows][cols];  
 uint8_t nflare = 0;
-uint32_t flare[maxflare];
+uint32_t flare[MAX_FLARE_ROWS];
 
 
 uint32_t isqrt(uint32_t n) {
@@ -139,11 +140,11 @@ uint32_t isqrt(uint32_t n) {
 
 // Set pixels to intensity around flare
 void glow( int x, int y, int z ) {  // pix[r][c]
-  int b = z * 10 / flaredecay + 1;
+  int b = z * 10 / flareDecay + 1;
   for ( int i=(y-b); i<(y+b); ++i ) {
     for ( int j=(x-b); j<(x+b); ++j ) {
       if ( i >=0 && j >= 0 && i < rows && j < cols ) {
-        int d = ( flaredecay * isqrt((x-j)*(x-j) + (y-i)*(y-i)) + 5 ) / 10;
+        int d = ( flareDecay * isqrt((x-j)*(x-j) + (y-i)*(y-i)) + 5 ) / 10;
         uint8_t n = 0;
         if ( z > d ) n = z - d;
         if ( n > pix[i][j] ) { // can only get brighter
@@ -155,10 +156,10 @@ void glow( int x, int y, int z ) {  // pix[r][c]
 }
 
 void newflare() {
-  if ( nflare < maxflare && random(1,101) <= flarechance ) {
+  if ( nflare < flareMax && random(1,101) <= flareChance ) {
     int x = random(0, cols);
-    int y = random(0, flarerows);
-    int z = NCOLORS - 1;
+    int y = random(0, flareRows);
+    int z = NCOLORS_18 - 1;
     flare[nflare++] = (z<<16) | (y<<8) | (x&0xff);
     glow( x, y, z );
   }
@@ -195,7 +196,7 @@ void make_fire(){
   for(uint16_t c=0; c<cols; c++){
     int i = pix[0][c];
     if ( i > 0 ) {
-      pix[0][c] = random(NCOLORS-13, NCOLORS-9);
+      pix[0][c] = random(NCOLORS_18-13, NCOLORS_18-9);
     }
   }
 
@@ -217,20 +218,21 @@ void make_fire(){
   }
   newflare();
 
-  // Set and draw
+/*
+  Set and draw
+  pix[row|height][collum|width] array stores the color array number
+  after all the mods, that goes into the matrix array in drawPixel.
+*/
   for(int r=0; r<rows; r++){
     for(int c=0; c<cols; c++){
       // matrix[pos(j,i)] = flameColor[pix[i][j]];
       matrix.drawPixel(r,c,matrix.color24bit(flameColor[pix[r][c]]));
     }
   }
-  matrix.show(); // FastLED.show();
+  matrix.show();
 }
 
-/*
-  pix[r-h][c-w] array stores the color array number
-  after all the mods, that goes into the matrix array.
-*/
+
 
 void setup() {
   Serial.begin(115200);
@@ -238,35 +240,20 @@ void setup() {
   pinMode(E,OUTPUT); digitalWrite(E,LOW); // E address is on the HUB74 GND pin
   // Initialize matrix...
   ProtomatterStatus status = matrix.begin();
-  Serial.print("\nProtomatter begin() status: ");  // FastLED.addLeds<MAT_TYPE, MAT_PIN>(matrix, (MAT_H * PANELS_H * MAT_W * PANELS_W));
-  Serial.println((int)status);   // FastLED.setBrightness(BRIGHT);
-  matrix.setRotation(1); // this is based on the native protomatter orientation. Mechanical and software just need to meet up.
-  matrix.fillScreen(0x0000); // FastLED.clear();
-  matrix.show(); // FastLED.show();
-
-  // for(uint16_t x=0; x<matrix.width(); x++){
-  //   for(uint16_t y=0; y<matrix.height(); y++){
-  //     if(x == 0){
-  //       matrix.drawPixel(x,y,matrix.color565(flameColor[NCOLORS-1])); // pix[i][j] = NCOLORS - 1;
-  //     }
-  //     else matrix.drawPixel(x,y,0x0000); // pix[i][j] = 0;
-  //   }
-  // }
-  // matrix.show();
+  Serial.print("\nProtomatter begin() status: ");  
+  Serial.println((int)status);   
+  matrix.setRotation(1); 
+  matrix.fillScreen(0x0000); 
+  matrix.show(); 
 
   Serial.begin(115200); while (!Serial){}
-  Serial.print("MatrixFireFast v"); Serial.print(VERSION);
-  // Serial.print("Pin "); Serial.print(MAT_PIN);
-  // Serial.print(", brightness "); Serial.print(BRIGHT);
+  Serial.print("MatrixFire Serial v"); Serial.print(VERSION);
   Serial.print(", FPS "); Serial.println(FPS);
   delay(2000);
 
 #ifdef DISPLAY_TEST
   displayTest();
 #endif
-  // FastLED.clear();
-  // FastLED.show();
-  // seedBackground();
 }
 
 void loop() {
