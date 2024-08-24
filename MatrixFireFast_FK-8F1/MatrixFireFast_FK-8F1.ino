@@ -22,17 +22,12 @@
         // This is based on the HSV function in Adafruit_NeoPixel.cpp, but with
         // 16-bit RGB565 output for GFX lib rather than 24-bit. See that code for
         // an explanation of the math, this is stripped of comments for brevity.
-        uint16_t Adafruit_Protomatter::color565(int c) {
+        uint16_t Adafruit_Protomatter::color24bit(int c) {
           uint8_t r = (c >> 16) & 0xFF;
           uint8_t g = (c >> 8) & 0xFF;
           uint8_t b = c & 0xFF;
           return colorRGB(r,g,b);
         }
-    
-    And I changed changed the existing color565 to colorRGB, which makes more sense:
-          uint16_t colorRGB(uint8_t red, uint8_t green, uint8_t blue) {
-            return ((red & 0xF8) << 8) | ((green & 0xFC) << 3) | (blue >> 3);
-          }
 
     Success!
     I am using the pix[][] paradigm to address an array of color values.
@@ -72,10 +67,7 @@ Adafruit_Protomatter matrix(
 /* Display size; can be smaller than matrix size, and if so, you can move the origin.
  * This allows you to have a small fire display on a large matrix sharing the display
  * with other stuff. See README at Github. */
-// const uint16_t rows = MAT_H * PANELS_H;
-// const uint16_t cols = MAT_W * PANELS_W;
-// const uint16_t xorg = 0;
-// const uint16_t yorg = 0;
+
 const uint16_t rows = MATRIX_HEIGHT;
 const uint16_t cols = MATRIX_WIDTH;
 
@@ -125,7 +117,6 @@ const uint8_t NCOLORS = (sizeof(flameColor)/sizeof(flameColor[0]));
 
 
 uint32_t pix[rows][cols];  // x, y uint8_t pix[rows][cols];
-// CRGB matrix[MAT_H * PANELS_H * MAT_W * PANELS_W];
 uint8_t nflare = 0;
 uint32_t flare[maxflare];
 
@@ -220,11 +211,10 @@ void make_fire(){
   // Set and draw
   for(int r=0; r<rows; r++){
     for(int c=0; c<cols; c++){
-      // matrix[pos(j,i)] = flameColor[pix[i][j]];
       matrix.drawPixel(r,c,matrix.color24bit(flameColor[pix[r][c]]));
     }
   }
-  matrix.show(); // FastLED.show();
+  matrix.show();
 }
 
 /*
@@ -238,35 +228,20 @@ void setup() {
   pinMode(E,OUTPUT); digitalWrite(E,LOW); // E address is on the HUB74 GND pin
   // Initialize matrix...
   ProtomatterStatus status = matrix.begin();
-  Serial.print("\nProtomatter begin() status: ");  // FastLED.addLeds<MAT_TYPE, MAT_PIN>(matrix, (MAT_H * PANELS_H * MAT_W * PANELS_W));
-  Serial.println((int)status);   // FastLED.setBrightness(BRIGHT);
+  Serial.print("\nProtomatter begin() status: ");  
+  Serial.println((int)status);   
   matrix.setRotation(1); // this is based on the native protomatter orientation. Mechanical and software just need to meet up.
-  matrix.fillScreen(0x0000); // FastLED.clear();
-  matrix.show(); // FastLED.show();
-
-  // for(uint16_t x=0; x<matrix.width(); x++){
-  //   for(uint16_t y=0; y<matrix.height(); y++){
-  //     if(x == 0){
-  //       matrix.drawPixel(x,y,matrix.color565(flameColor[NCOLORS-1])); // pix[i][j] = NCOLORS - 1;
-  //     }
-  //     else matrix.drawPixel(x,y,0x0000); // pix[i][j] = 0;
-  //   }
-  // }
-  // matrix.show();
+  matrix.fillScreen(0x0000); 
+  matrix.show(); 
 
   Serial.begin(115200); while (!Serial){}
   Serial.print("MatrixFireFast v"); Serial.print(VERSION);
-  // Serial.print("Pin "); Serial.print(MAT_PIN);
-  // Serial.print(", brightness "); Serial.print(BRIGHT);
   Serial.print(", FPS "); Serial.println(FPS);
   delay(2000);
 
 #ifdef DISPLAY_TEST
   displayTest();
 #endif
-  // FastLED.clear();
-  // FastLED.show();
-  // seedBackground();
 }
 
 void loop() {

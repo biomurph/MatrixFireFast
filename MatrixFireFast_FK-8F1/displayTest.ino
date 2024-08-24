@@ -2,7 +2,7 @@
 
 void displayTest(){
   Serial.println("Testing Display");
-  matrix.fillScreen(0x0000); // FastLED.clear();
+  matrix.fillScreen(0x0000);
   matrix.show();
   delay(100);
   for ( uint16_t i=0; i<cols; ++i ) { // pix[r][c]
@@ -10,13 +10,13 @@ void displayTest(){
     matrix.drawPixel(0,i,matrix.color24bit(flameColor[pix[0][i]]));
     matrix.show(); // FastLED.show();
     delay(1000/FPS);
-    pix[0][i] = flameColor[0];  // matrix[pos(i,0)] = 0;
+    pix[0][i] = flameColor[0]; 
     matrix.drawPixel(0,i,matrix.color24bit(flameColor[pix[0][i]]));
   }
   for ( uint16_t i=0; i<rows; ++i ) {
     pix[i][0] = NCOLORS-1;
     matrix.drawPixel(i,0,matrix.color24bit(flameColor[pix[i][0]]));
-    matrix.show(); // FastLED.show();
+    matrix.show(); 
     delay(1000/FPS);
     pix[i][0] = flameColor[0];
     matrix.drawPixel(i,0,matrix.color24bit(flameColor[pix[i][0]]));
@@ -27,7 +27,7 @@ void displayTest(){
    *  it's not important to functionality otherwise.
    */
   uint16_t r = 0;
-  matrix.fillScreen(0x0000);  // FastLED.clear();
+  matrix.fillScreen(0x0000);  
   matrix.show();
   delay(100);
   for(int i=NCOLORS-1; i>=0; i--){
@@ -40,6 +40,6 @@ void displayTest(){
     }
     else break;
   }
-  matrix.show(); // FastLED.show();
+  matrix.show(); 
   delay(2000);
 }
