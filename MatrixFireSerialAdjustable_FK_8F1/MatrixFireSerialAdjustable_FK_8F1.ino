@@ -226,7 +226,7 @@ void make_fire(){
   for(int r=0; r<rows; r++){
     for(int c=0; c<cols; c++){
       // matrix[pos(j,i)] = flameColor[pix[i][j]];
-      matrix.drawPixel(r,c,matrix.color24bit(flameColor[pix[r][c]]));
+      matrix.drawPixel(r,c,matrix.color24bit(flameColor_18[pix[r][c]]));
     }
   }
   matrix.show();
@@ -235,21 +235,21 @@ void make_fire(){
 
 
 void setup() {
-  Serial.begin(115200);
+  Serial.begin(115200); while (!Serial){}
+  Serial.print("MatrixFire Serial v"); Serial.print(VERSION);
+  Serial.print(", FPS "); Serial.println(FPS);
+  delay(2000);
   pinMode(6,OUTPUT);
   pinMode(E,OUTPUT); digitalWrite(E,LOW); // E address is on the HUB74 GND pin
   // Initialize matrix...
   ProtomatterStatus status = matrix.begin();
-  Serial.print("\nProtomatter begin() status: ");  
+  Serial.print("\nProtomatter status: ");  
   Serial.println((int)status);   
   matrix.setRotation(1); 
   matrix.fillScreen(0x0000); 
   matrix.show(); 
 
-  Serial.begin(115200); while (!Serial){}
-  Serial.print("MatrixFire Serial v"); Serial.print(VERSION);
-  Serial.print(", FPS "); Serial.println(FPS);
-  delay(2000);
+  
 
 #ifdef DISPLAY_TEST
   displayTest();

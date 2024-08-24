@@ -18,9 +18,9 @@ void adjustFlareChance(int direction){
 	Serial.print("flareChance: "); Serial.println(flareChance);
 }
 
-void adjustFlareRows(int direction){
+void adjustFlareDecay(int direction){
 	flareDecay += direction;
-	flareDecay = constrain(flareRows,MinFlareDecay,MaxFlareDecay);
+	flareDecay = constrain(flareDecay,MinFlareDecay,MaxFlareDecay);
 	Serial.print("flareDecay: "); Serial.println(flareDecay);
 }
 
