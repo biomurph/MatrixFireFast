@@ -24,3 +24,4 @@ void adjustFlareDecay(int direction){
 	Serial.print("flareDecay: "); Serial.println(flareDecay);
 }
 
+
