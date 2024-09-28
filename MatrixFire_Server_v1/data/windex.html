@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Matrix Fire</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" type="image/png" href="flameFavicon_48.png">
+<link rel="stylesheet" type="text/css" href="smile.css"> </head>
+<body style="background-color:darkslategrey;">
+  <div class="topnav">
+    <h1>Matrix Fire Server</h1>
+  </div>
+  <div class="content">
+    <div class="card-grid">
+      <div class="card">
+          <p class="card-title">MATRIX FIRE</p>
+            <p>
+              <button class="buttonBurn" id="bBURN" >BURN</button>
+              <button class="buttonDie" id="bDIE" >DIE</button>
+            </p>
+          <p> <span id="STATEs"></span> </p>
+        </div>
+
+      <div class="card">
+        <p class="card-title"></i> Flare Rows</p> <p class="switch">
+          <input type="range" oninput="updateSliderFlareRows(this)" id="flareRowSlider" min= "0" max="30" step="1" value="0" class="slider">
+        </p>
+        <p class="state"><span id="flareRows"></span> </p>  
+      </div>
+
+      <div class="card">
+        <p class="card-title"></i> Max Flares</p> <p class="switch">
+          <input type="range" oninput="updateSliderFlareMax(this)" id="flareMaxSlider" min= "0" max="100" step="1" value="0" class="slider">
+        </p>
+        <p class="state"><span id="flareMax"></span> </p>  
+      </div>
+
+      <div class="card">
+        <p class="card-title"></i> Flare Chance</p> <p class="switch">
+          <input type="range" oninput="updateSliderFlareChance(this)" id="flareChanceSlider" min= "0" max="100" step="1" value="0" class="slider">
+        </p>
+        <p class="state"><span id="flareChance"></span> </p>  
+      </div>
+
+      <div class="card">
+        <p class="card-title"></i> Flare Decay</p> <p class="switch">
+          <input type="range" oninput="updateSliderFlareDecay(this)" id="flareDecaySlider" min= "0" max="50" step="1" value="0" class="slider">
+        </p>
+        <p class="state"><span id="flareDecay"></span> </p>  
+      </div>
+
+    </div>
+</div>
+<script src="dragon.js"></script> </body>
+</html>
+

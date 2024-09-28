@@ -96,6 +96,7 @@ void make_fire(){
 */
   for(int r=0; r<rows; r++){
     for(int c=0; c<cols; c++){
+      // matrix[pos(j,i)] = flameColor[pix[i][j]];
       matrix.drawPixel(r,c,color24bitTo565(flameColor_18[pix[r][c]]));
     }
   }

@@ -209,18 +209,24 @@ void make_fire(){
   newflare();
 
   // Set and draw
+  uint8_t red, grn, blu;
   for(int r=0; r<rows; r++){
     for(int c=0; c<cols; c++){
-      matrix.drawPixel(r,c,matrix.color24bit(flameColor[pix[r][c]]));
+      red = (flameColor[pix[r][c]] >> 16) & 0xFF;
+      grn = (flameColor[pix[r][c]] >> 8) & 0xFF;
+      blu = flameColor[pix[r][c]] & 0xFF;
+      matrix.drawPixel(r,c,color24bitTo565  (flameColor[pix[r][c]]));
     }
   }
   matrix.show();
 }
 
-/*
-  pix[r-h][c-w] array stores the color array number
-  after all the mods, that goes into the matrix array.
-*/
+uint16_t color24bitTo565(uint32_t c){
+  red = (c >> 16) & 0xFF;
+  grn = (c >> 8) & 0xFF;
+  blu = c & 0xFF;
+  return matrix.color565(red,grn,blu);
+}
 
 void setup() {
   Serial.begin(115200);

@@ -1,10 +1,10 @@
 
 /*
    Colors for matrix fire
-   lists go from least hot to most hot
+   list goes from least hot to most hot
 */
 
-uint8_t red,grn,blu; // used to convert 24bit to 656
+uint8_t red,grn,blu;
 
 const uint32_t flameColor_11[] = {
   0x000000,

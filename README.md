@@ -4,7 +4,7 @@
 	* Target: RP2040 Pico H
 	* Matrix: Waveshare 16x10 [matrix](https://www.waveshare.com/pico-rgb-led.htm)
 
-![RP2040 Fire](assets/MatrixFireFast_RP2040.mp4)
+![RP2040 Fire](assets/MatrixFireFast_RP2040.gif)
 
 ## HUB75 Matrix Panel
 * Added MatrixFireFast_FK-8F1 Sketch
@@ -40,13 +40,20 @@ Next steps are to make the ESP32 into a web server so that I can adjust the fire
 
 This is the first successful fire animation with the stock color depth. Notice how it is a low fire. [also, might be running at a slower frame rate, depending on your systemz]
 
-![lowFire](assets/lowFire.mp4)
+![lowFire](assets/lowFire.gif)
 
 Here, I made a bigger array for the color fade to take up more of the display. I will need to tweak the knobs to dial in a more realistic burn.
 
-![biggerFire](assets/biggerFire.mp4)
+![biggerFire](assets/biggerFire.gif)
 
-## TOGGLEDBITS README BELOW
+## Update Spetember 2024
+I set up some code to adjust the flariables over serial. That sketch is [here](https://github.com/biomurph/MatrixFireFast/tree/master/MatrixFire_SerialAdjust_FK_8F1). It actually works well, surprisingly? I get immediate change in the fire parameters without glitching (much). 
+
+I was able, with my limited HTML and Javascript skills, to build a very simple server to add wireless control of the MatrixFire. This is what it looks like on my laptop, it looks better on my mobile. The sketch is still in progress. I want to be able to change the color depth and, of course, the colors! Those will likely be hard-coded arrays that get accessed through some kind of lookup state-machine...
+
+![Fire Server](assets/FireServer.png)
+
+## TOGGLEDBITS ORIGINAL README BELOW
 
 # MatrixFireFast
 
