@@ -17,7 +17,11 @@
       - flareMax (maximum number of flares allowed at one time) 
       - flareChance (random based percent chance of a flare happening)
       - flareDecay (how flast the flare dies down: lower = slower)
-    
+   
+     To update the server data file:
+  	First, put the ESP32 into bootloader mode, then close any open serial monitors connected to it.
+  	Then, use [CMD][SHIFT][P] to open the command palett and then "Upload LittleFS"
+   
     TO DO:
       - color adjust (?)
       - colorDepth adjust (?)
@@ -29,6 +33,7 @@
 #include <Arduino.h>
 #include "FS.h"
 #include "LittleFS.h"  
+#include "ESPmDNS.h"
 #include <WiFi.h>
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
@@ -39,7 +44,7 @@
 #define MATRIX_HEIGHT 32
 #define E 34 // FK-8F1 is ABCDE driver. E needs to be pulled low?
 #define LED 6
-#define VERSION "ESP32 MatrixFire Server"
+// #define VERSION "ESP32 MatrixFire Server"
 #define FPS 15              /* frame rate */
 unsigned long t = 0;        /* frame rate timer */
 // #define DISPLAY_TEST  /* uncomment to show test patterns at startup */
@@ -54,12 +59,10 @@ uint8_t oePin      = 11;
 AsyncWebServer server(80); // Create a WebSocket object
 AsyncWebSocket ws("/ws"); // Set LED GPIO
 const int ledPin = 6;
-// String sliderValue = "0";
 char msg[1024];
 char gasoline[256];
 char flariables[256];
 bool gotUpdated = true;
-// const char mdnsName[] = "matrixFire";
 // Initialize files
 void initLittleFS(){  
   if (!LittleFS.begin(true)) {
@@ -101,6 +104,7 @@ Adafruit_Protomatter matrix(
   false);      // No double-buffering here (see "doublebuffer" example)
 
 char versionString[] = "Matrix Fire Server v1";
+const char* hostname = "pixel-fire";
 
 void setup() {
   Serial.begin(115200);

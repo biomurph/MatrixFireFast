@@ -22,8 +22,12 @@ void initWiFi() {
     Serial.print('.');
     delay(1000);
   }
-  Serial.print(F("Open the page at "));
-  Serial.println(WiFi.localIP()); 
+  if(!MDNS.begin(hostname)) {
+     Serial.println("Error starting mDNS");
+  }
+  Serial.print(F("\nOpen the page at "));
+  Serial.print(WiFi.localIP());Serial.write('\t'); Serial.print(hostname); Serial.println(F(".local"));
+  Serial.print("RSSI "); Serial.println(WiFi.RSSI());
 }
 
 void handleWebSocketMessage(void *arg, uint8_t *data, size_t len){

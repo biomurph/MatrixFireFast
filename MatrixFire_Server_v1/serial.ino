@@ -49,13 +49,14 @@ void serialCheck(){
 }
 
 void printControl(){
-  Serial.print(F("MatrixFire v")); Serial.println(VERSION);
+  Serial.println(versionString);
   Serial.print(FPS); Serial.println(" FPS"); 
   Serial.println(F("Send 'r', 'R' to decrease, increase height of flareRows"));
   Serial.println(F("Send 'm', 'M' to decrease, increase max number of flares"));
   Serial.println(F("Send 'c', 'C' to decrease, increase the chance of a flare"));
   Serial.println(F("Send 'd', 'D' to decrease, increase the decay of a flare"));
   // Serial.println("");
+  
   Serial.println(F("Send '?' to get this message"));
   printFlariables();
 }
@@ -63,9 +64,9 @@ void printControl(){
 
 void printFlariables(){
   Serial.println(F("Rows\tMax\tChance\tDecay"));
-  Serial.print(flareRows); Serial.print("\t");
-  Serial.print(flareMax); Serial.print("\t");
-  Serial.print(flareChance); Serial.print("\t");
+  Serial.print(flareRows); Serial.write('\t');
+  Serial.print(flareMax); Serial.write('\t');
+  Serial.print(flareChance); Serial.write('\t');
   Serial.println(flareDecay);
 
 }
