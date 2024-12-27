@@ -1,4 +1,5 @@
 # biomurph fork
+# This repo is frozen as of winter 2024
 ## RP2040
 * Added MatrixFireFast_RP2040 Sketch for Verification
 	* Target: RP2040 Pico H
